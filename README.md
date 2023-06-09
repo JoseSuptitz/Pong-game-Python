@@ -1,5 +1,5 @@
 # Pong-game-Python
 
-Pong game made in python by me using pygame.
+Pong game made in python using pygame, se a demonstration:
 
 ![Pong game](pong/pong.gif)
