@@ -1,5 +1,5 @@
 # Pong-game-Python
 
-Pong game made in python
+Pong game made in python by me using pygame.
 
-[Pong game]()
+[Pong game](pong/pong.gif)
