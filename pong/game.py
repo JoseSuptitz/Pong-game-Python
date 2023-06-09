@@ -1,96 +1,127 @@
 import pygame
 from sys import exit
 
-def main():
-    pygame.init()
+def bouncing_ball():
+    global x_speed, y_speed
+    global counter1, counter2
 
-    #  Tamanho da tela
-    screen = pygame.display.set_mode((800, 400))
+    circleRect.x += x_speed
+    circleRect.y += y_speed
 
-    #  Titulo do jogo
-    pygame.display.set_caption("Pong Game")
+    # colisão com as paredes da tela
+    if circleRect.right >= screen_width:
+        x_speed *= -1
+        counter2 += 1
+    elif circleRect.left <= 0:
+        x_speed *= -1
+        counter1 += 1
+    if circleRect.bottom >= screen_height or circleRect.top <= 0:
+        y_speed *= -1
 
-    #  Varivel de framerate 
-    clock = pygame.time.Clock()
+    collision_tolerance = 10
 
-    # Carrega a surface de imagem de fundo
-    bgd_surface = pygame.image.load("bgd.png").convert_alpha()
+    #  Colisão com a barra 1
+    if circleRect.colliderect(bar1):
+        if abs(bar1.top-circleRect.bottom) < collision_tolerance and y_speed > 0:
+            y_speed *= -1
+        if abs(bar1.bottom-circleRect.top) < collision_tolerance and y_speed < 0:
+            y_speed *= -1
+        if abs(bar1.right-circleRect.left) < collision_tolerance and x_speed < 0:
+            x_speed *= -1
+        if abs(bar1.left - circleRect.right) < collision_tolerance and x_speed > 0:
+            x_speed *= -1
 
-    bar_surface = pygame.image.load("bar.png").convert_alpha()
-    bar_y_pos = 150
+    #  Colisão com a barra 2
+    if circleRect.colliderect(bar2):
+        if abs (bar2.top-circleRect.bottom) < collision_tolerance and y_speed > 0:
+            y_speed *= -1
+        if abs (bar2.bottom-circleRect.top) < collision_tolerance and y_speed < 0:
+            y_speed *= -1
+        if abs (bar2.right-circleRect.left) < collision_tolerance and x_speed < 0:
+            x_speed *= -1
+        if abs (bar2.left - circleRect.right) < collision_tolerance and x_speed > 0:
+            x_speed *= -1        
 
-    bar2_surface = pygame.image.load("bar2.png").convert_alpha()
-    bar2_y_pos = 150
+    pygame.draw.rect(screen, (255,50,50), circleRect, 50, 50)
 
-    ball_surface = pygame.image.load("ball.png").convert_alpha()
 
-    velocidade = 5
-    screen_width = 800
-    screen_height = 400
+pygame.init()
+pygame.font.init()
 
-    while True:
+#  Tamanho da tela
+screen_width = 800
+screen_height = 400
+screen = pygame.display.set_mode((screen_width, screen_height))
+
+#  Titulo do jogo
+pygame.display.set_caption("Pong Game")
+
+#  Contadores de pontos
+counter1 = 0
+counter2 = 0
+
+#  Varivel de framerate 
+clock = pygame.time.Clock()
+
+#  Fonte de texto
+my_font = pygame.font.SysFont("Arial", 30)
+
+bar1 = pygame.Rect(20, 250, 30, 50)
+bar2 = pygame.Rect(750, 250, 30, 50)
+circleRect = pygame.Rect(350, 150, 30, 30)
+
+#  Velocidade da bola
+x_speed, y_speed = 5, 4
+
+#  Velocidade das barras
+velocidade = 5
+
+while True:
+
+    #  Eventos
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            exit()   
+
+
+    #  Se bar1 sair da tela, volta para o inicio e vice-versa
+    if bar1.y >= screen_height:
+        bar1.y = -50
+    elif bar1.y <= -50:
+        bar1.y = screen_height
+
+    if bar2.y >= screen_height:
+        bar2.y = -50
+    elif bar2.y <= -50:
+        bar2.y = screen_height
         
-        #  Eventos
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()   
 
-        # Posições da bola
-        ball_xpos = 350
-        ball_ypos = 150
-        ball_step_x = 10
-        ball_step_y = 10
+    #  Movimentação das setas do bar 
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_UP]:
+        bar1.y -= velocidade
+    if keys[pygame.K_DOWN]:
+        bar1.y += velocidade
 
-        # Taca a imagem de fundo na tela
-        screen.blit(bgd_surface, (0, 0))
-        screen.blit(bar_surface, (30, bar_y_pos))
-        screen.blit(bar2_surface, (700, bar2_y_pos))
-        screen.blit(ball_surface, (ball_xpos, ball_ypos))
+    #  Movimentação das setas do bar2
+    if keys[pygame.K_w]:
+        bar2.y -= velocidade
+    if keys[pygame.K_s]:
+        bar2.y += velocidade
 
-        #  Se bar1 sair da tela, volta para o inicio e vice-versa
-        if bar_y_pos >= 400:
-            bar_y_pos = 0
-        elif bar_y_pos <= 0:
-            bar_y_pos = 400
-
-        if bar2_y_pos >= 400:
-            bar2_y_pos = 0
-        elif bar2_y_pos <= 0:
-            bar2_y_pos = 400
-    
-
-        #  Movimentação das setas do bar 
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_UP]:
-            bar_y_pos -= velocidade
-        if keys[pygame.K_DOWN]:
-            bar_y_pos += velocidade
-
-        #  Movimentação das setas do bar2
-        if keys[pygame.K_w]:
-            bar2_y_pos -= velocidade
-        if keys[pygame.K_s]:
-            bar2_y_pos += velocidade
-
-        if ball_xpos > screen_width - 64 or ball_xpos < 0:
-            ball_step_x = -ball_step_x
-        if ball_ypos > screen_width - 64 or ball_ypos < 0:
-            ball_step_y = -ball_step_y
-        # atualiza a posição da bola
-        ball_xpos += ball_step_x # move pra baixo na direita
-        ball_ypos += ball_step_y # move pra baixo
-
-        screen.blit(bgd_surface, (0,0))    
-        screen.blit(bar_surface, (30, bar_y_pos))
-        screen.blit(bar2_surface, (700, bar2_y_pos)) 
-        screen.blit(ball_surface, (ball_xpos, ball_ypos))
-        #  Atualiza a tela
-        pygame.display.flip()
-
-        #  Usa variavel de framerate e limita a 60 fps
-        clock.tick(60)
+    screen.fill((30,30,30))
+    pygame.draw.rect(screen, (255,255,255), bar1)
+    pygame.draw.rect(screen, (0,0,0), bar2)
+    bouncing_ball()
+    text_surface1 = my_font.render(f'Branco: {counter1}', False, (255, 255, 255))
+    text_surface2 = my_font.render(f'Preto: {counter2}', False, (255, 255, 255))
+    screen.blit(text_surface1, (90,10))
+    screen.blit(text_surface2, (590,10))
 
 
-if __name__=="__main__":
-    main()
+    #  Atualiza a tela
+    pygame.display.flip()
+
+    #  Usa variavel de framerate e limita a 60 fps
+    clock.tick(60)
